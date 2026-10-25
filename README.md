@@ -4,8 +4,7 @@ Compound-centric analysis of high-throughput pull-down affinity selection mass
 spectrometry (AS-MS) screens. Version **1.3.0**.
 
 OpenASChem connects pooled-compound standards, cross-run peak quantification,
-target enrichment and interactive candidate review. It processes centroided
-mzML/mzXML files and CSV/TSV/XLSX compound libraries, supports multiple pools,
+target enrichment and interactive candidate review. It processes mzML/mzXML files and CSV/TSV/XLSX compound libraries, supports multiple pools,
 and produces offline XIC/barplot reports and an experiment-wide overview.
 
 ## Install
