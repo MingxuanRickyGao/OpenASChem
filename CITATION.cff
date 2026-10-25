@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use OpenASChem, please cite this software and its associated publication when available."
+type: software
+title: "OpenASChem: compound-centric analysis of high-throughput AS-MS screens"
+version: 1.3.0
+authors:
+  - family-names: Gao
+    given-names: Mingxuan
+repository-code: "https://github.com/huhehaotecrystal/OpenASChem"

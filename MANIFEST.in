@@ -1,0 +1,10 @@
+include LICENSE NOTICE CHANGELOG.md CONTRIBUTING.md CITATION.cff openaschem_environment.yml requirements.txt
+include OpenASChem.py openaschem_gui.py openfilling_gui.py
+recursive-include docs *.md
+recursive-include examples *.py
+recursive-include tests *.py *.npz *.md
+recursive-include packaging *.py *.iss *.txt *.md
+recursive-include src/openaschem/templates *.html
+recursive-include src/openaschem/assets *.png *.ico
+recursive-include src/openaschem/licenses *.txt
+global-exclude *.py[cod] *.nbc *.nbi

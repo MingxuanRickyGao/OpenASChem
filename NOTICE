@@ -1,0 +1,20 @@
+OpenASChem
+Copyright (c) 2024 Mingxuan Gao
+
+The numerical alignment implementation in src/openaschem/dialignr_numba.py
+was adapted from a local DreamDIA-v5/DIAlignR.py development snapshot.
+Original snapshot SHA-256:
+66f3845c869dec8344918fdf6cbf157eb10e4b5709e10e85fa50adde1ca10be9
+
+DreamDIA is distributed by the Yu laboratory under Apache License 2.0:
+https://github.com/xmuyulab/DreamDIA
+The Apache-2.0 text is included in src/openaschem/licenses/Apache-2.0.txt.
+Module organization and formatting have changed; numerical kernels are retained.
+The local v5 snapshot is not represented as a publicly tagged upstream release.
+See docs/ALIGNMENT_BACKEND.md.
+
+Algorithm reference: Gupta et al., DIAlignR, Molecular & Cellular Proteomics
+(2019), DOI: 10.1074/mcp.TIR118.001132.
+
+Offline reports embed the installed Plotly.js bundle at generation time.
+Its bundled license header is retained.

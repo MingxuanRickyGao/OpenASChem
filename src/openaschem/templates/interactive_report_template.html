@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenASChem interactive report</title>
+<style>
+:root{font:14px system-ui,"Segoe UI",sans-serif;color:#18304b;background:#f3f6fa}*{box-sizing:border-box}body{margin:0}header{background:#15304d;color:white;padding:22px 30px}header h1{margin:0 0 7px;font-size:23px}header p{margin:0;color:#c9d9e9}.wrap{max-width:1550px;margin:18px auto;padding:0 22px}.card{background:white;border:1px solid #dae3ed;border-radius:10px;padding:16px 18px;margin-bottom:15px}.toolbar{display:flex;align-items:end;gap:10px;flex-wrap:wrap}label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:#50657c}label.check{flex-direction:row;align-items:center;padding-bottom:8px}button,select,input{font:inherit;padding:8px;border:1px solid #c6d3e1;border-radius:5px;background:white;color:#18304b}button{cursor:pointer}button:hover{background:#edf4fc}button.primary{background:#1c65a8;color:white;border-color:#1c65a8}button:disabled{opacity:.45;cursor:default}#compound{min-width:310px;max-width:520px}#search{width:185px}.help{font-size:12px;color:#61748a;line-height:1.7;margin:8px 0}.badge{display:inline-block;padding:3px 8px;background:#edf3fa;border-radius:4px;margin:3px 5px 3px 0;font-size:12px}.target{color:#a13030;background:#fff0ef}.metadata{line-height:1.8;word-break:break-word}h2{font-size:18px;margin:0 0 9px}.tablewrap{max-height:330px;overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px}th,td{padding:8px;border-bottom:1px solid #e3eaf2;text-align:left;white-space:nowrap}th{position:sticky;top:0;background:#f0f5fb}#error{display:none;background:#ffecec;color:#9d2626;white-space:pre-wrap;padding:16px}#busy{margin-left:auto;color:#61748a;font-size:12px}#empty{padding:28px;text-align:center;color:#62758a}#xic{height:650px}#bars{height:430px}.notice{padding:9px 12px;background:#fff9e9;border:1px solid #ecdfb7;border-radius:5px;font-size:12px;line-height:1.6}#printArea{display:none}.printPage{background:white;color:#18304b}.printPage h1{font:18px system-ui;margin:0 0 8px}.printPage p{font:11px system-ui;margin:5px 0}.printPage img{width:100%;height:160mm;object-fit:contain}.foot{font-size:12px;color:#63758a;margin:20px 0 28px}@media(max-width:700px){.wrap{padding:0 8px}header{padding:18px}#compound{min-width:240px;max-width:95vw}#xic{height:600px}}
+@page{size:A4 landscape;margin:10mm}@media print{body{background:white}body.preparedPrint>*{display:none!important}body.preparedPrint #printArea{display:block!important}.printPage{break-after:page;page-break-after:always;height:185mm;overflow:hidden}.printPage:last-child{break-after:auto;page-break-after:auto}.printPage img{max-height:158mm}html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body>
+<header><h1>OpenASChem · interactive evidence report</h1><p id="summary"></p></header>
+<main class="wrap">
+<div id="error" class="card" role="alert"></div>
+<div id="selectionSummary" class="card" hidden></div>
+<section class="card"><div class="toolbar">
+<label>Records<select id="scope"><option value="hits">Candidate hits</option><option value="all">All quantified compounds</option></select></label>
+<label>Search<input id="search" placeholder="Compound / target / formula"></label>
+<label>Compound / reference peak<select id="compound"></select></label>
+<button id="prev">Previous</button><button id="next">Next</button><span id="busy" role="status">Loading…</span>
+</div><div id="metadata" class="metadata" style="margin-top:10px"></div>
+<p class="help" id="scopeNote"></p>
+<p class="notice" id="selectionNote" hidden></p>
+<div class="toolbar" style="margin-top:10px">
+<button id="pdf" class="primary">Export current PDF</button><button id="pdfList">Export list PDF</button><button id="cancelPdf" hidden>Cancel export</button><button id="quantCsv">Export quantification CSV</button>
+</div><p class="help">PDF export opens the browser print dialog: choose <b>Save as PDF</b>. It captures the current zoom, visible traces and plot settings; XIC and barplot are printed on separate pages. Exporting a list uses the current filtered list.</p>
+</section>
+<div id="empty" class="card" hidden></div>
+<div id="plots">
+<section class="card"><h2>Extracted ion chromatograms</h2>
+<div class="toolbar">
+<label>Layout<select id="xicMode"><option value="stacked">Stacked · normalized per run</option><option value="overlay">Overlay</option></select></label>
+<label>Intensity<select id="xicScale"><option value="normalized">Normalized per run</option><option value="absolute">Absolute</option><option value="log">Log intensity</option></select></label>
+<label>Signal<select id="signal"><option value="smooth">Smoothed</option><option value="raw">Original</option><option value="both">Original + smoothed</option></select></label>
+<label>Runs<select id="runScope"><option value="all">All runs</option><option value="targetStandard">Standards + hit targets</option><option value="target">Hit targets only</option><option value="experimental">Experimental runs</option><option value="standard">Standards only</option></select></label>
+<label>RT unit<select id="unit"><option value="s">Seconds</option><option value="min">Minutes</option></select></label>
+<label class="check"><input id="boundaries" type="checkbox" checked>Peak boundaries</label><button id="focus">Peak region</button><button id="full">Full run</button>
+</div><p id="xicNote" class="help"></p><div id="xic"></div>
+<p class="help">Wheel to zoom; drag to select a region; double-click to reset. The plot toolbar supports pan and box zoom. Click a legend entry to hide a trace. Green: standards; red: hit-associated targets; blue: other targets.</p>
+</section>
+<section class="card"><h2>Quantification across targets</h2>
+<div class="toolbar"><label>Display<select id="barMode"><option value="group">Target means + replicates</option><option value="run">Individual runs</option></select></label>
+<label>Y axis<select id="barScale"><option value="linear">Linear</option><option value="log">Log</option></select></label>
+<label>Values<select id="quantSource"><option value="analysis">Analysis matrix</option><option value="peak">Peak quantification before matrix filters</option></select></label>
+<label class="check"><input type="checkbox" id="barStandards">Include standards</label></div>
+<p class="help">Grouped bars show the mean ± SEM; points show individual replicates. Analysis-matrix values include the pipeline's RT/width checks and background floor. Switching the display does not change hit statistics.</p><div id="bars"></div></section>
+<section class="card"><details><summary>Run-level boundaries and quantities</summary><div class="tablewrap"><table><thead><tr><th>Run</th><th>Role</th><th>Left RT (s)</th><th>Right RT (s)</th><th>Width (s)</th><th>Peak quantity</th><th>Analysis quantity</th></tr></thead><tbody id="runTable"></tbody></table></div></details></section>
+</div>
+<div class="notice">This report presents the pipeline's existing peak assignments and hit annotations. XICs use each run's original RT axis. Normalized curves compare peak shapes, not absolute abundance. Quantities and statistics retain their analysis precision; display traces are stored as compressed float32 arrays.</div>
+<div class="foot">Self-contained offline HTML. No R, web server or network connection is required. Open in a recent Chrome or Edge browser. Candidate status is unchanged by visualization controls.</div>
+</main><div id="printArea"></div>
+<script>/*__PLOTLY__*/</script>
+<script>
+'use strict';
+const DATA=/*__DATA__*/;
+const $=id=>document.getElementById(id), COLORS={standard:'#169846',target:'#b63333',other:'#4f83ca'};
+let current=-1,visible=[],rangeSeconds=null,queue=Promise.resolve(),lastError=null,exporting=false,cancelExport=false;
+const decoded=new Map();
+const config={responsive:true,scrollZoom:true,displaylogo:false,toImageButtonOptions:{format:'svg',filename:'OpenASChem'}};
+const fmt=(v,d=3)=>v===null||v===undefined?'—':Number(v).toLocaleString('en-US',{maximumFractionDigits:d});
+const factor=()=>$('unit').value==='min'?60:1;
+function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fail(error){lastError=String(error.stack||error);$('error').style.display='block';$('error').textContent=lastError;$('busy').textContent='Report error';console.error(error);}
+function record(){return DATA.records[current];}
+function role(run,r=record()){return run.standard?'standard':r.targets.includes(run.group)?'target':'other';}
+function selectedRuns(r=record()){
+ return DATA.runs.map((run,i)=>({run,i})).filter(({run})=>{
+  switch($('runScope').value){case 'standard':return run.standard;case 'experimental':return !run.standard;
+   case 'target':return role(run,r)==='target';case 'targetStandard':return role(run,r)!=='other';default:return true;}
+ });
+}
+async function inflate(text){
+ const bytes=Uint8Array.from(atob(text),c=>c.charCodeAt(0));
+ const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'));
+ return new Float32Array(await new Response(stream).arrayBuffer());
+}
+async function tracesFor(compound){
+ if(decoded.has(compound)){const value=decoded.get(compound);decoded.delete(compound);decoded.set(compound,value);return value;}
+ const values=await Promise.all(DATA.compounds[compound].traces.map(async t=>({raw:await inflate(t.raw),smooth:await inflate(t.smooth)})));
+ values.forEach((t,i)=>{if(t.raw.length!==DATA.runs[i].rt.length||t.smooth.length!==DATA.runs[i].rt.length)throw Error('Trace length mismatch');});
+ decoded.set(compound,values);if(decoded.size>5)decoded.delete(decoded.keys().next().value);return values;
+}
+function focusRange(r=record()){
+ const valid=r.bounds.filter(b=>b.every(v=>v!==null));
+ return valid.length?[Math.max(0,Math.min(...valid.map(b=>b[0]))-15),Math.max(...valid.map(b=>b[1]))+15]:null;
+}
+function queueRender(){queue=queue.then(render).catch(fail);return queue;}
+function selectRecord(index){current=Number(index);rangeSeconds=focusRange();return queueRender();}
+function fillOptions(){
+ const term=$('search').value.toLowerCase().trim(),hitsOnly=$('scope').value==='hits';
+ visible=DATA.records.map((r,i)=>({r,i})).filter(({r})=>(!hitsOnly||r.hit)&&
+   (!term||[r.compound,DATA.compounds[r.compound].formula,...r.targets].join(' ').toLowerCase().includes(term))).map(x=>x.i);
+ $('compound').replaceChildren(...visible.map(i=>{const r=DATA.records[i],option=document.createElement('option');option.value=i;option.textContent=`${r.compound} · peak ${r.rank}${r.hit?' · HIT':''}`;return option;}));
+ if(!visible.includes(current)){current=visible.length?visible[0]:-1;rangeSeconds=current>=0?focusRange():null;}
+ $('compound').value=current;$('scopeNote').textContent=`${visible.length} displayed records · ${DATA.records.filter(r=>r.hit).length} candidate-hit records · ${DATA.records.length} quantified reference peaks`;
+ return queueRender();
+}
+function metadataHtml(r){
+ const c=DATA.compounds[r.compound];
+ return `<b>${escapeHtml(c.id)}</b> <span class="badge">Reference peak ${r.rank}</span><span class="badge">m/z ${fmt(c.mz,6)}</span><span class="badge">${escapeHtml(c.formula)}</span>`+
+  (r.hit?`<span class="badge target">Candidate hit</span><br>Targets: ${r.targets.map(escapeHtml).join('; ')} · Enrichment: ${escapeHtml(r.fold_change)} · P = ${r.p_value===null?'—':r.p_value.toExponential(3)}`:
+  '<br>Quantified reference peak; not reported as a candidate hit.');
+}
+async function render(){
+ const noSelection=current<0||!visible.includes(current);
+ $('empty').hidden=!noSelection;$('plots').hidden=noSelection;
+ for(const id of ['pdf','pdfList','quantCsv'])$(id).disabled=noSelection||exporting;
+ $('prev').disabled=noSelection||exporting||visible.indexOf(current)<=0;$('next').disabled=noSelection||exporting||visible.indexOf(current)>=visible.length-1;
+ if(noSelection){$('selectionNote').hidden=true;$('empty').textContent=DATA.records.length?'No records match this filter. Choose “All quantified compounds” or change the search.':'No valid reference peaks were quantified in this pool.';$('metadata').replaceChildren();$('busy').textContent='No selection';return;}
+ const r=record();$('compound').value=current;$('busy').textContent='Loading compound…';
+ $('metadata').innerHTML=metadataHtml(r);
+ $('selectionNote').hidden=!r.selection;
+ if(r.selection)$('selectionNote').textContent=`Reference selection: ${r.selection.status}. Score: ${fmt(r.selection.score,3)}; mass error: ${fmt(r.selection.mass_error_ppm,3)} ppm; isotope mismatch: ${fmt(r.selection.isotope_loss,3)}. Scores are heuristic, not identification probabilities.`;
+ const values=await tracesFor(r.compound);
+ await renderXic(r,values);await renderBars(r);renderTable(r);
+ $('busy').textContent=`${visible.indexOf(current)+1} / ${visible.length}`;window.__reportReady=true;
+}
+async function renderXic(r,values){
+ const selected=selectedRuns(r),stacked=$('xicMode').value==='stacked',f=factor(),signal=$('signal').value;
+ $('xicScale').disabled=stacked||exporting;
+ const scale=stacked?'normalized':$('xicScale').value;
+ $('xicNote').textContent=stacked?'Each run is normalized independently and offset vertically. Use Overlay + Absolute to compare signal magnitudes.':
+   scale==='normalized'?'Each run is normalized independently; compare shapes using the barplot for abundance.':'Original signal magnitudes are displayed on a shared intensity axis.';
+ const traces=[],shapes=[],ticks=[],labels=[];
+ selected.forEach(({run,i},position)=>{
+  const v=values[i],color=COLORS[role(run,r)],offset=stacked?1.4*(selected.length-position-1):0;
+  let maximum=1;for(const a of [v.raw,v.smooth])for(const value of a)maximum=Math.max(maximum,value);
+  const x=run.rt.map(t=>t/f),normalize=scale==='normalized',keys=signal==='both'?['raw','smooth']:[signal];
+  keys.forEach(key=>{
+   const y=Array.from(v[key],value=>(normalize?value/maximum:value)+offset);
+   traces.push({x,y,type:'scatter',mode:'lines',name:run.id+(signal==='both'?' · '+key:''),legendgroup:run.id,
+    line:{color,width:key==='raw'&&signal==='both'?1:1.6},opacity:key==='raw'&&signal==='both'?.35:1,
+    customdata:Array.from(v[key]),hovertemplate:`${escapeHtml(run.id)}<br>RT %{x:.3f} ${$('unit').value}<br>Intensity %{customdata:.5g}<extra></extra>`});
+  });
+  if(stacked){ticks.push(offset+.4);labels.push(run.id);}
+  if($('boundaries').checked&&r.bounds[i].every(b=>b!==null)){
+   const [left,right]=r.bounds[i].map(t=>t/f);
+   shapes.push({type:'rect',xref:'x',yref:stacked?'y':'paper',x0:left,x1:right,y0:stacked?offset:0,y1:stacked?offset+1:1,
+     fillcolor:color,opacity:.06,line:{width:0},layer:'below'});
+   for(const boundary of [left,right])shapes.push({type:'line',xref:'x',yref:stacked?'y':'paper',x0:boundary,x1:boundary,
+    y0:stacked?offset:0,y1:stacked?offset+1:1,line:{color,width:1,dash:'dot'},opacity:.6});
+  }
+ });
+ const height=stacked?Math.max(430,selected.length*26+115):550;
+ $('xic').style.height=height+'px';
+ const layout={height,margin:{l:stacked?240:85,r:25,t:30,b:65},shapes,
+  xaxis:{title:`Retention time (${$('unit').value})`,range:rangeSeconds?rangeSeconds.map(t=>t/f):undefined,gridcolor:'#edf1f6'},
+  yaxis:stacked?{tickvals:ticks,ticktext:labels,range:[-.2,Math.max(1,selected.length)*1.4],gridcolor:'#edf1f6',zeroline:false,tickfont:{size:11}}:
+   {title:scale==='normalized'?'Normalized intensity':'Intensity',type:scale==='log'?'log':'linear',gridcolor:'#edf1f6'},
+  showlegend:!stacked,legend:{orientation:'h',y:-.2},hovermode:'closest',dragmode:'zoom',font:{color:'#243f5d',size:12},
+  annotations:selected.length?[]:[{text:'No runs in this view. Choose “All runs”.',xref:'paper',yref:'paper',x:.5,y:.5,showarrow:false}]};
+ await Plotly.react('xic',traces,layout,config);
+ $('xic').removeAllListeners('plotly_relayout');
+ $('xic').on('plotly_relayout',event=>{
+  if(event['xaxis.range[0]']!==undefined)rangeSeconds=[Number(event['xaxis.range[0]'])*factor(),Number(event['xaxis.range[1]'])*factor()];
+  else if(event['xaxis.range'])rangeSeconds=event['xaxis.range'].map(v=>Number(v)*factor());
+  else if(event['xaxis.autorange'])rangeSeconds=null;
+ });
+}
+function barValues(r){return $('quantSource').value==='analysis'?r.quantities:r.peak_quantities;}
+async function renderBars(r){
+ const values=barValues(r),selected=DATA.runs.map((run,i)=>({run,i})).filter(({run})=>$('barStandards').checked||!run.standard);
+ const groupMode=$('barMode').value==='group',traces=[];
+ if(groupMode){
+  const groups=new Map();
+  selected.forEach(({run,i})=>{if(values[i]===null)return;if(!groups.has(run.group))groups.set(run.group,{label:run.standard?'Standards':run.label,role:role(run,r),values:[],ids:[]});groups.get(run.group).values.push(values[i]);groups.get(run.group).ids.push(run.id);});
+  const ordered=[...groups.entries()].sort((a,b)=>({target:0,other:1,standard:2}[a[1].role]-{target:0,other:1,standard:2}[b[1].role])||a[0].localeCompare(b[0]));
+  const means=[],sems=[],labels=[],colors=[],hover=[];
+  ordered.forEach(([group,g],position)=>{
+   const n=g.values.length,mean=g.values.reduce((a,b)=>a+b,0)/n;
+   const sem=n>1?Math.sqrt(g.values.reduce((a,b)=>a+(b-mean)**2,0)/(n-1))/Math.sqrt(n):0;
+   means.push(mean);sems.push(sem);labels.push(g.label);colors.push(COLORS[g.role]);hover.push(`${escapeHtml(group)}<br>n = ${n}<br>SEM = ${fmt(sem)}`);
+   traces.push({x:g.values.map((v,j)=>position+(j-(n-1)/2)*.09),y:g.values,type:'scatter',mode:'markers',name:g.label+' replicates',showlegend:false,
+    marker:{color:COLORS[g.role],size:7,line:{color:'white',width:1}},text:g.ids,hovertemplate:'%{text}<br>%{y:.6g}<extra></extra>'});
+  });
+  traces.unshift({x:means.map((_,i)=>i),y:means,type:'bar',name:'Mean ± SEM',marker:{color:colors,opacity:.45,line:{width:1,color:colors}},width:.58,
+   error_y:{type:'data',array:sems,visible:true,thickness:1.3,width:5,color:'#263c53'},text:hover,textposition:'none',hovertemplate:'%{text}<br>Mean = %{y:.6g}<extra></extra>'});
+  var xaxis={tickvals:means.map((_,i)=>i),ticktext:labels,tickangle:-30,title:'Target / sample group'};
+ }else{
+  traces.push({x:selected.map(({run})=>run.id),y:selected.map(({i})=>values[i]),type:'bar',marker:{color:selected.map(({run})=>COLORS[role(run,r)])},
+   hovertemplate:'%{x}<br>%{y:.6g}<extra></extra>'});
+  var xaxis={tickangle:-45,title:'Individual run'};
+ }
+ const unit=DATA.quantification_method==='area'?'Peak area (intensity × s)':'Peak intensity';
+ await Plotly.react('bars',traces,{height:430,margin:{l:90,r:25,t:25,b:115},xaxis,
+  uirevision:[r.key,$('barMode').value,$('barScale').value,$('quantSource').value,$('barStandards').checked].join('|'),
+  yaxis:{title:unit,type:$('barScale').value,gridcolor:'#edf1f6'},showlegend:false,barmode:'overlay',dragmode:'zoom',font:{color:'#243f5d',size:12}},config);
+}
+function renderTable(r){
+ const body=$('runTable');body.replaceChildren();DATA.runs.forEach((run,i)=>{
+  const [left,right]=r.bounds[i],tr=document.createElement('tr');
+  [run.id,role(run,r),fmt(left),fmt(right),left===null||right===null?'—':fmt(right-left),fmt(r.peak_quantities[i]),fmt(r.quantities[i])].forEach(value=>{const td=document.createElement('td');td.textContent=value;tr.appendChild(td);});body.appendChild(tr);
+ });
+}
+function csvField(value){return '"'+String(value??'').replace(/"/g,'""')+'"';}
+function downloadQuant(){
+ const r=record(),rows=[['compound','reference_peak','run','role','left_rt_s','right_rt_s','peak_quantity','analysis_quantity'],
+  ...DATA.runs.map((run,i)=>[r.compound,r.rank,run.id,role(run,r),...r.bounds[i],r.peak_quantities[i],r.quantities[i]])];
+ const url=URL.createObjectURL(new Blob([rows.map(row=>row.map(csvField).join(',')).join('\n')],{type:'text/csv;charset=utf-8'}));
+ const a=document.createElement('a');a.href=url;a.download=r.key+'_quantification.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+async function capturePages(r){
+ const pages=[];
+ for(const [id,title] of [['xic','Extracted ion chromatograms'],['bars','Quantification across targets']]){
+  const svg=await Plotly.toImage($(id),{format:'svg',width:Math.max(1100,$(id).clientWidth),height:$(id).layout.height});
+  const page=document.createElement('section');page.className='printPage';
+  const heading=document.createElement('h1');heading.textContent=`${DATA.pool} · ${r.compound} · reference peak ${r.rank} · ${title}`;page.appendChild(heading);
+  const note=document.createElement('p');note.textContent=(r.hit?`Candidate targets: ${r.targets.join('; ')} | Enrichment: ${r.fold_change} | P: ${r.p_value}`:'Quantified reference peak; not a candidate hit')+
+    ` | Reference selection: ${r.selection?r.selection.status:'top1'} | Quantification: ${DATA.quantification_method} | XIC: ${$('xicMode').selectedOptions[0].text}; ${$('signal').selectedOptions[0].text} | Bar values: ${$('quantSource').selectedOptions[0].text}`;page.appendChild(note);
+  const image=document.createElement('img');image.src=svg;image.alt=title;page.appendChild(image);await image.decode();pages.push(page);
+ }
+ return pages;
+}
+async function preparePdf(indices=[current]){
+ await queue;if(exporting)return false;
+ exporting=true;cancelExport=false;$('cancelPdf').hidden=false;const original=current,originalRange=rangeSeconds?rangeSeconds.slice():null;
+ const originalBarRanges={'xaxis.range':$('bars')._fullLayout.xaxis.range.slice(),'yaxis.range':$('bars')._fullLayout.yaxis.range.slice()};
+ const controlStates=[...document.querySelectorAll('main select,main input,main button')].filter(el=>el.id!=='cancelPdf').map(el=>[el,el.disabled]);
+ controlStates.forEach(([el])=>el.disabled=true);document.body.classList.remove('preparedPrint');$('printArea').replaceChildren();
+ try{
+  for(let j=0;j<indices.length;j++){
+   if(cancelExport)break;const i=indices[j];
+   if(i!==current){current=i;rangeSeconds=focusRange();await render();}
+   $('busy').textContent=`Preparing PDF ${j+1} / ${indices.length}…`;
+   const pages=await capturePages(record());$('printArea').append(...pages);
+   await new Promise(resolve=>setTimeout(resolve,0));
+  }
+  if(!cancelExport)document.body.classList.add('preparedPrint');else $('printArea').replaceChildren();
+  return !cancelExport;
+ }finally{
+  current=original;rangeSeconds=originalRange;exporting=false;$('cancelPdf').hidden=true;
+  controlStates.forEach(([el,disabled])=>el.disabled=disabled);await render();await Plotly.relayout('bars',originalBarRanges);
+ }
+}
+async function exportPdf(indices){try{if(await preparePdf(indices))window.print();}catch(error){fail(error);}}
+async function selectFromHash(){
+ const params=new URLSearchParams(location.hash.slice(1)),key=params.get('reference'),compound=params.get('compound');
+ if(!key&&!compound){await fillOptions();return;}
+ const index=DATA.records.findIndex(r=>key?r.key===key:r.compound===compound);
+ $('search').value='';
+ if(index>=0){current=index;rangeSeconds=focusRange(DATA.records[index]);if(!DATA.records[index].hit)$('scope').value='all';await fillOptions();}
+ else{await fillOptions();current=-1;rangeSeconds=null;await queueRender();$('compound').value='';$('scopeNote').textContent='The requested reference was not found in this report.';}
+}
+async function init(){
+ if(typeof DecompressionStream==='undefined')throw Error('Please open this offline report in a recent Chrome or Edge browser.');
+ document.title=DATA.pool+' · OpenASChem report';
+ $('summary').textContent=`${DATA.pool} · ${DATA.runs.length} runs · ${DATA.records.length} quantified reference peaks · ${DATA.records.filter(r=>r.hit).length} candidate hits · ${DATA.quantification_method}`;
+ if(!DATA.records.some(r=>r.hit)||DATA.report_kind==='review')$('scope').value='all';
+ if(DATA.report_kind==='review'){$('scope').options[1].textContent='All standard candidate peaks';document.title+=' - all-candidate review';}
+ if(DATA.selection_summary){
+  const s=DATA.selection_summary;$('selectionSummary').hidden=false;
+  $('selectionSummary').textContent=`Reference selection: ${s.mode}; accepted compounds: ${s.selected_compounds}; ambiguous compounds: ${s.ambiguous_compounds}; isotope-vetoed candidate peaks: ${s.isotope_veto_candidates}. `+
+   (DATA.report_kind==='review'?'Review of all candidate peaks. Only final accepted hits are flagged; other peaks are not additional reported hits.':'See the companion review HTML and reference-selection CSV files for alternative and ambiguous peaks.');
+ }
+ $('scope').addEventListener('change',fillOptions);$('search').addEventListener('input',fillOptions);$('compound').addEventListener('change',e=>selectRecord(e.target.value));
+ $('prev').addEventListener('click',()=>selectRecord(visible[visible.indexOf(current)-1]));$('next').addEventListener('click',()=>selectRecord(visible[visible.indexOf(current)+1]));
+ for(const id of ['xicMode','xicScale','signal','runScope','unit','boundaries','barMode','barScale','quantSource','barStandards'])$(id).addEventListener('change',queueRender);
+ $('focus').addEventListener('click',()=>{rangeSeconds=focusRange();queueRender();});$('full').addEventListener('click',()=>{rangeSeconds=null;queueRender();});
+ $('quantCsv').addEventListener('click',downloadQuant);$('pdf').addEventListener('click',()=>exportPdf([current]));$('pdfList').addEventListener('click',()=>exportPdf(visible.slice()));
+ $('cancelPdf').addEventListener('click',()=>{cancelExport=true;});
+ window.addEventListener('afterprint',()=>document.body.classList.remove('preparedPrint'));
+ window.report={data:DATA,selectRecord,ready:()=>queue,getCurrent:()=>current,getError:()=>lastError,getVisible:()=>visible.slice(),preparePdf,exportPdf,
+  zoomTo:(left,right)=>{rangeSeconds=[left,right];return queueRender();}};
+ window.addEventListener('hashchange',()=>selectFromHash().catch(fail));
+ await selectFromHash();window.__reportReady=true;
+}
+init().catch(fail);
+</script></body></html>

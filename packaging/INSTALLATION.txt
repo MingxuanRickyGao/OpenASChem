@@ -1,0 +1,14 @@
+OpenASChem 1.3.0
+
+This installer includes Python and all required dependencies.
+No internet connection, Python installation or Conda installation is needed.
+
+Windows: run OpenASChem-1.3.0-Windows-x64-Setup.exe and choose an installation directory.
+The setup wizard creates Start Menu shortcuts and offers a desktop shortcut.
+
+Linux x86_64: bash OpenASChem-1.3.0-Linux-x86_64.sh [--prefix DIRECTORY]
+The default directory is ~/.local/share/openaschem/1.3.0.
+Run <installation directory>/bin/openaschem-gui, or use the application shortcut.
+A graphical desktop is required for the GUI; the CLI also works without a display.
+
+The first analysis may take longer while Numba compiles its numerical kernels.
