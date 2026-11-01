@@ -10,7 +10,7 @@ and produces offline XIC/barplot reports and an experiment-wide overview.
 ## Install
 
 For Windows and Linux x86_64, download an installer from
-[Releases](https://github.com/huhehaotecrystal/OpenASChem/releases/latest):
+[Releases](https://github.com/MingxuanRickyGao/OpenASChem/releases/latest):
 
 - **Windows:** run `OpenASChem-1.3.0-Windows-x64-Setup.exe`. The wizard offers a
   desktop shortcut and creates Start Menu entries with the OpenASChem logo.
@@ -112,7 +112,25 @@ and click **Run**. In particular, change the default standard prefix from
 
 ### Run from the command line
 
-If the `openaschem` command is available in your environment, run:
+The bundled installers do not add `openaschem` to `PATH`. To use the command
+below, first make the installed launcher available in the current terminal.
+For the default installation locations:
+
+**Windows PowerShell:**
+
+```powershell
+$env:Path = "$env:LOCALAPPDATA\Programs\OpenASChem-1.3.0\bin;$env:Path"
+```
+
+**Linux:**
+
+```shell
+export PATH="$HOME/.local/share/openaschem/1.3.0/bin:$PATH"
+```
+
+If you chose a custom installation directory, substitute its `bin` directory.
+Source installations already provide the command in their Python environment.
+Then run:
 
 ```shell
 openaschem openidentify --file_dir standard_mix_test/raw --chemical_pool_library standard_mix_test/standard_mix_library.tsv --standard_prefix STD --out standard_mix_results --peak_selection identity --min_fold_change 5 --p_value_cutoff 0.01 --min_fold_change_single 1 --p_value_cutoff_single 0.01 --n_threads 2

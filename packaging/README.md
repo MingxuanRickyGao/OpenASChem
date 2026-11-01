@@ -36,7 +36,12 @@ archives and binary installers belong in GitHub Releases, not in this repository
    network operations in the finalization step. `OPENASCHEM_NO_SHORTCUTS=1` avoids
    creating Linux shortcuts in automated tests.
 6. Record fresh SHA256 hashes and upload the installers, checksum file, wheel
-   and source distribution to the `v1.3.0` GitHub Release.
+   and source distribution to the `v1.3.0` GitHub Release. Write `SHA256SUMS.txt`
+   with LF line endings on every platform (for example, write ASCII bytes with
+   `Path.write_bytes`); CRLF makes Linux `sha256sum` treat the carriage return as
+   part of each filename. Include only assets actually uploaded to that release,
+   and exclude the checksum file itself. Check it on Linux with
+   `sha256sum --ignore-missing --check SHA256SUMS.txt`.
 
 The source installation instructions in the main README remain available for
 developers. There is no separate dependency-downloading installer.

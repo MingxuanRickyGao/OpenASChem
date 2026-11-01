@@ -1,7 +1,7 @@
 # Install OpenASChem 1.3.0
 
 Download an installer from the project's
-[GitHub Release](https://github.com/huhehaotecrystal/OpenASChem/releases/tag/v1.3.0).
+[GitHub Release](https://github.com/MingxuanRickyGao/OpenASChem/releases/tag/v1.3.0).
 The installers include Python and dependencies and work without downloading
 additional packages. Do not unpack them into a separate Python environment.
 
@@ -38,9 +38,17 @@ when a desktop directory is available. Some desktops require selecting
 
 ## Verify the download
 
-Compare the installer SHA256 with `SHA256SUMS.txt` from the same release. On
-Windows use `Get-FileHash -Algorithm SHA256 <installer>`; on Linux use
-`sha256sum -c SHA256SUMS.txt` after downloading the files listed there.
+Download `SHA256SUMS.txt` from the same release into the directory containing
+your chosen installer. On Windows, use `Get-FileHash -Algorithm SHA256 <installer>`
+and compare the hash with the matching filename in the checksum file. On Linux,
+run the following from the download directory:
+
+```shell
+sha256sum --ignore-missing --check SHA256SUMS.txt
+```
+
+This verifies files you downloaded without requiring the other platform's
+installer or the source packages. The installer you selected should report `OK`.
 
 ## First launch
 
