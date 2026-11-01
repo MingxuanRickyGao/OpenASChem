@@ -9,7 +9,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        # Ubuntu 22.04 provides the Python 3.9 binaries used by this matrix.
+        os: [ubuntu-22.04, windows-latest]
         python: ["3.9", "3.11", "3.12"]
     runs-on: ${{ matrix.os }}
     steps:

@@ -1,5 +1,12 @@
 # OpenASChem
 
+[![Checks](https://github.com/MingxuanRickyGao/OpenASChem/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MingxuanRickyGao/OpenASChem/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/MingxuanRickyGao/OpenASChem)](https://github.com/MingxuanRickyGao/OpenASChem/releases/latest)
+[![License](https://img.shields.io/github/license/MingxuanRickyGao/OpenASChem)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.9%E2%80%933.12-3776AB)](pyproject.toml)
+[![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-0078D4)](docs/INSTALLATION.md)
+[![Test data DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23851067.svg)](https://doi.org/10.5281/zenodo.23851067)
+
 Compound-centric analysis of high-throughput affinity selection mass
 spectrometry (AS-MS) screens. Version **1.3.0**.
 
