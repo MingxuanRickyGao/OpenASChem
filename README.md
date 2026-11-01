@@ -1,6 +1,6 @@
 # OpenASChem
 
-Compound-centric analysis of high-throughput pull-down affinity selection mass
+Compound-centric analysis of high-throughput affinity selection mass
 spectrometry (AS-MS) screens. Version **1.3.0**.
 
 OpenASChem connects pooled-compound standards, cross-run peak quantification,
