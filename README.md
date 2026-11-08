@@ -184,3 +184,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [CHANGELOG.md](CHANGELOG.md).
 OpenASChem-authored code is provided under the [MIT license](LICENSE).
 The adapted DreamDIA alignment component retains Apache-2.0 attribution;
 see [NOTICE](NOTICE) and [third-party notices](docs/THIRD_PARTY.md).
+
+## Citation
+
+If you use OpenASChem in your research, please cite our preprint:
+
+Gao, M., Wang, X., Sun, J., Edwards, A., Peng, H., & Röst, H. L. **OpenASChem: A Data Analysis Software Suite for High-Throughput Affinity Selection Mass Spectrometry.** *ChemRxiv* (2026). https://doi.org/10.26434/chemrxiv.15011791/v1
